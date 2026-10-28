@@ -24,3 +24,34 @@ window.open = function (url, target, features) {
 }
 
 document.addEventListener('click', hookClick, { capture: true })
+// ===== Android：状态栏配色跟随页面（白） =====
+(function () {
+  // 1) 设置状态栏颜色为白色（Android 会据此着色，并自动切换图标深浅）
+  let theme = document.querySelector('meta[name="theme-color"]');
+  if (!theme) {
+    theme = document.createElement('meta');
+    theme.name = 'theme-color';
+    document.head.appendChild(theme);
+  }
+  theme.content = '#ffffff'; // 与页面一致的白色
+
+  // 2) 让页面可延伸到系统栏下方（需 App 开启沉浸式/不保留安全区域才生效）
+  let vp = document.querySelector('meta[name="viewport"]');
+  if (vp) {
+    if (!/viewport-fit/.test(vp.content)) vp.content += ', viewport-fit=cover';
+  } else {
+    vp = document.createElement('meta');
+    vp.name = 'viewport';
+    vp.content = 'width=device-width, initial-scale=1, viewport-fit=cover';
+    document.head.appendChild(vp);
+  }
+
+  // 3) 页面上下背景设为白，延伸到系统栏时颜色统一
+  const s = document.createElement('style');
+  s.textContent = `
+    html, body { background:#ffffff !important; }
+    body { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+  `;
+  document.head.appendChild(s);
+})();
+
